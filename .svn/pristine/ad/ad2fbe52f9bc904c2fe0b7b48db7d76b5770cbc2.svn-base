@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.springmvc.mybatis.mapper.RoleDao">
+    <sql id="findrolebyname">
+		<if test="roleName!=null and roleName!=''">
+			AND T1.ROLENAME = #{roleName}
+		</if>
+		<if test="roleState!=null and roleState!=''">
+			AND T1.ROLESTATE = #{roleState}
+		</if>
+	</sql>
+	<!--指定角色状态-->
+	<sql id="roleState">
+		<if test="roleState!=null and roleState!=''">
+			AND ROLESTATE = #{rolestate}
+		</if>
+	</sql>
+    <!--获取所有交易系统类型角色(类型为1和4)。1：交易系统类型角色 2：管理系统类型角色3：运作团队角色 4：操盘类型角色 -->
+	<select id="findAllTradeRoles" resultType="roleInfo">
+		select * from t_roleinfo t where roletype in(1,3)
+	</select>
+	
+    <!--获取所有管理系统类型角色(类型为1和4)。1：交易系统类型角色 2：管理系统类型角色3：运作团队角色 4：操盘类型角色 5：操盘经理类型角色 -->
+	<select id="findAllManagerRoles" resultType="roleInfo">
+		select * from t_roleinfo t where roletype in(2,4,5)
+	</select>	
+	
+    <!--根据角色id获取角色详细信息 -->
+	<select id="findRoleById" resultType="roleInfo" parameterType="Long">
+		<!-- select * from t_roleinfo t where roleid=#{roleId} -->
+		SELECT T1.ROLEID,T1.ROLENAME,T1.PARENTID,T1.ROLETYPE,
+         		T1.ROLEDESC,T1.ROLESTATE,T2.ROLENAME AS PARENTNAME
+			    FROM   T_ROLEINFO T1,(
+			    SELECT ROLEID,ROLENAME
+			    FROM   T_ROLEINFO
+			    WHERE ROLESTATE=1
+			    ) T2
+    	WHERE  T1.PARENTID=T2.ROLEID(+)
+		AND    T1.ROLEID=#{roleId}
+	</select>
+	
+	<!--根据角色id获取该角色所有的直接下级角色 -->
+	<select id="findRolesByParentId"  parameterType="long"  resultType="roleInfo">
+		SELECT ROLEID, ROLENAME,PARENTID, ROLETYPE, ROLEDESC, ROLESTATE
+		FROM  T_ROLEINFO
+		WHERE PARENTID = #{parentId}
+		AND   ROLESTATE= 1
+		<!-- <include refid="roleState"></include> -->
+	</select>	
+	
+	<!--根据角色名获取角色信息 -->
+	<select id="findRolesByName"  parameterType="roleInfo"  resultType="roleInfo">
+		select * from t_roleinfo t where rolename=#{roleName} 
+	</select>
+	
+	<!--根据角色名获取角色信息 -->
+	<select id="findRolesByZHName"  parameterType="roleInfo"  resultType="roleInfo">
+		select t.* from t_INTERNATION T1, t_roleinfo t where 1=1 AND T1.ID=T.ROLENAME AND T1.ZH=#{roleName} 
+	</select>	
+	
+    <!--修改角色信息-->
+	<update id="updateRole" parameterType="roleInfo">
+		update t_roleinfo
+		 set roleid = #{roleId},
+		 	 rolename = #{roleName},
+		 	 parentid = #{parentId},
+		 	 roledesc = #{roleDesc},
+		 	 roletype = #{roleType}
+		
+		where roleid = #{roleId}
+	</update>			
+	
+   <!-- 获取序列 -->	
+  <select id="getSqe" resultType="long">
+      SELECT sq_roleinfo.nextval FROM dual      
+  </select>	
+  
+  <insert id="addRole" parameterType="roleInfo">   
+	   	insert into t_roleinfo(   		 
+	   		roleid,
+	   		rolename,
+	   		parentid,
+	   		roletype,
+	   		roledesc
+	   	) values (
+			#{roleId},
+	   		#{roleName},
+	   		#{parentId},
+	   		#{roleType},
+	   		#{roleDesc}
+	   	)   	
+   </insert>  	
+   
+    <delete id="deleteRoleById" parameterType="long">
+    	delete from t_roleinfo where roleid  = #{roleId}
+	</delete>
+	
+	<select id="selectUserRole" parameterType="long" resultType="roleInfo">
+	    SELECT T1.*,
+           (CASE
+             WHEN V1.ROLEID IS NULL THEN
+              0
+             ELSE
+              1
+           END) distribution
+      FROM t_ROLEINFO T1,
+           (SELECT T2.Roleid
+              FROM t_userrole T2
+               WHERE T2.Userid = #{uid}) V1
+     WHERE T1.ROLEID = V1.ROLEID(+)
+	</select>	
+	
+	<select id="selectRightRole" parameterType="map" resultType="roleInfo">
+			SELECT T2.*,(CASE
+		             WHEN T.ROLEID IS NULL THEN
+		              0
+		             ELSE
+		              1
+		           END) distribution
+		  FROM (SELECT * FROM t_ROLERIGHT T WHERE T.RIGHTID = #{rightid}) T, t_Roleinfo T2
+		 WHERE T.ROLEID(+) = T2.ROLEID	 
+		   and t2.roletype=#{rightType}
+    </select>  
+	<!-- 查询所有角色信息/或按名查询 -->
+	<select id = "findAllRole"  parameterType="roleInfo" resultType = "RoleInfo">
+	SELECT T1.ROLEID,T1.ROLENAME,T1.PARENTID,T1.ROLETYPE,T1.ROLEDESC,T1.ROLESTATE,T2.ROLENAME AS PARENTNAME
+	FROM   T_ROLEINFO T1,T_ROLEINFO T2
+	WHERE  T1.PARENTID = T2.ROLEID(+)
+	<include refid="findrolebyname"/>
+	</select>
+	
+	<update id = "changeRoleState" parameterType = "RoleInfo">
+		UPDATE T_ROLEINFO
+		SET    ROLESTATE = #{roleState}
+		WHERE  ROLEID = #{roleId}
+	</update>
+
+</mapper>

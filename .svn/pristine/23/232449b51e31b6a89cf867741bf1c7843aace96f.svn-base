@@ -1,0 +1,6 @@
+FTP_ADDRESS=127.0.0.1
+FTP_PORT=21
+FTP_USER_NAME=ftpadmin
+FTP_PASSWORD=ftpadmin
+FTP_BASE_PATH=/images
+IMAGE_BASE_URL=http://127.0.0.1:81/images

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.springmvc.mybatis.mapper.InnerUserDao">
+    <sql id="findInnerUserCons">
+    and INNERUSERID>1
+        <if test="loginName != null and loginName != '' ">  
+          and loginName like '%'||#{loginName}||'%' escape   '\'
+        </if>
+        <if test="userName != null and userName != '' ">  
+          and userName like '%'||#{userName}||'%'
+        </if>
+        <if test="userType != null and userType != '' ">
+          and userType = #{userType}
+        </if> 
+        <if test="userId != null and userId != '' ">
+          and innerUserId = #{userId}
+        </if>
+        <if test="startDate != null ">
+          and createDate >= #{startDate}
+        </if>
+        <if test="endDate != null ">
+          and createDate &lt;= #{endDate}
+        </if>
+        <if test="startLoginDate != null  ">
+          and loginDate >= #{startLoginDate}
+        </if>
+        <if test="endLoginDate != null  ">
+          and loginDate &lt;= #{endLoginDate}
+        </if>      
+    </sql>
+    
+    <select id="countInnerUser" resultType="int" parameterType="map">
+        select count(*) from t_inneruser where 1=1
+          <include refid="findInnerUserCons"/>
+    </select>
+    
+    <select id="findAllInnerUserList" resultType="innerUser" parameterType="map">
+	SELECT *
+ 	 FROM (SELECT MY_TABLE.*, ROWNUM AS num
+          FROM (select t.innerUserId,
+				       t.loginName,
+				       t.userName,
+				       t.sex,
+				       t.certificatetype,
+				       t.certificateno,
+				       t.concatphone,
+				       t.emergencyconcatname,
+				       t.emergencyconcatphone,
+				       t.usertype,
+				       t.status,
+				       t.boundsys,
+				       t.canbet,
+				       COUNT(1) OVER() AS nums,
+				       createDate,
+				       loginDate,
+				       loginstatus
+					  from t_inneruser t
+					 where 1 = 1
+		         <include refid="findInnerUserCons"/>
+	   ) MY_TABLE
+		<if test="endIndex != null and endIndex != '' ">
+        <![CDATA[where ROWNUM <= #{endIndex}  ]]>
+		</if>
+		)
+		<if test="startNum != null and startNum != '' ">
+         <![CDATA[where num >= #{startNum}    ]]>
+        </if>			
+				order by inneruserId desc
+		
+    </select>
+    <!-- 典型的分页查询映射结束 -->
+   
+   <!-- 获取内部用户序列 -->	
+  <select id="getInnerUserSeq" resultType="long">
+      select sq_inneruser.nextval from dual      
+    </select>
+
+
+	  <insert id="addInnerUser" parameterType="InnerUser">   
+    	INSERT INTO T_INNERUSER 
+		  (CERTIFICATETYPE,
+		   SEX,
+		   USERNAME,
+		   LOGINNAME,
+		   INNERUSERID,
+		   LOGINSTATUS,
+		   CREATEDATE,
+		   BOUNDSYS,
+		   CANBET,
+		   USERPWD,
+		   STATUS,
+		   USERTYPE,
+		   EMERGENCYCONCATPHONE,
+		   EMERGENCYCONCATNAME,
+		   CONCATPHONE,
+		   CERTIFICATENO)
+		VALUES
+		  (#{certificateType},
+		   #{sex},
+		   #{userName},
+		   #{loginName},
+		   #{innerUserId},
+		   #{loginStatus},
+		   #{createDate},
+		   #{boundSys},
+		   #{canbet},
+		   #{userPwd},
+		   #{status},
+		   #{userType},
+		   #{emergencyConcatPhone},
+		   #{emergencyConcatName},
+		   #{concatPhone},
+		   #{certificateNo})
+    </insert>
+    <update id="updInnerUser" parameterType="InnerUser">
+	   UPDATE T_INNERUSER
+   SET 
+<if test="certificateType != null and certificateType != '' ">
+   	   CERTIFICATETYPE      = #{certificateType},
+</if>
+<if test="sex != null and sex != '' ">
+       SEX                  = #{sex},
+</if>
+<if test="userName != null and userName != '' ">      
+       USERNAME             = #{userName},
+</if>
+<if test="loginName != null and loginName != '' ">     
+       LOGINNAME            = #{loginName},
+</if>
+<if test="loginStatus != null and loginStatus != '' ">              
+       LOGINSTATUS          = #{loginStatus},
+</if>
+<if test="loginDate != null  ">       
+       LOGINDATE            = #{loginDate},
+</if>
+<if test="boundSys != null and boundSys != '' ">             
+       BOUNDSYS             = #{boundSys},
+</if>
+<if test="canbet != null and canbet != '' ">       
+       CANBET               = #{canbet},
+</if>
+<if test="userPwd != null and userPwd != '' ">       
+       USERPWD              = #{userPwd},
+</if>
+<if test="status != null and status != '' ">       
+       STATUS               = #{status},
+</if>
+<if test="emergencyConcatPhone != null and emergencyConcatPhone != '' ">
+       EMERGENCYCONCATPHONE = #{emergencyConcatPhone},
+</if>
+<if test="emergencyConcatName != null and emergencyConcatName != '' ">       
+       EMERGENCYCONCATNAME  = #{emergencyConcatName},
+</if>
+<if test="concatPhone != null and concatPhone != '' ">       
+       CONCATPHONE          = #{concatPhone},
+</if>
+<if test="certificateNo != null and certificateNo != '' ">       
+       CERTIFICATENO        = #{certificateNo},
+</if>
+   	   INNERUSERID    = #{innerUserId} 
+       WHERE INNERUSERID    = #{innerUserId}
+       
+	</update>
+	<select id="getInnerUserById" resultType="InnerUser" parameterType="long">
+		select * from t_inneruser where innerUserId = #{innerUserId}
+	</select>
+	<select id="findInnerUserByLoginName" resultType="InnerUser" parameterType="InnerUser">
+		select * from t_inneruser where loginName = #{loginName}
+	</select>	
+   
+    <delete id="delInnerUser" parameterType="long">
+    	DELETE FROM T_INNERUSER WHERE INNERUSERID  = #{innerUserId}
+	</delete> 
+		
+	
+</mapper>
+

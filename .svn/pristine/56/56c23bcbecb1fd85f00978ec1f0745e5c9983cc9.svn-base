@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.springmvc.mybatis.mapper.RoleRightDao">
+      <!--根据角色id获取角色拥有的权限 -->
+	<select id="findRightListByRoleId" resultType="roleRight"  parameterType="map">
+		select * from t_roleright t where 1=1 
+		<if test="roleId != -1">  
+		   and roleid=#{roleId}
+		</if>		
+	</select>	
+	<!--根据权限id获取对应的角色-->
+	<select id="findRoleRightByRightId" resultType="RoleRight" parameterType="map">
+		SELECT ROLEID,RIGHTID
+		FROM   T_ROLERIGHT
+		WHERE  1=1
+		<if test="null!=rightId and ''!=rightId">
+			AND RIGHTID=#{rightId}
+		</if>
+	</select>	
+  
+  <insert id="insertRoleRigh" parameterType="roleRight">   
+	   	insert into t_roleright(   		 
+	   		roleid,
+	   		rightid
+	   	) values (
+			#{roleId},
+	   		#{rightId}
+	   	)   	
+   </insert>  	
+   <!--批量添加角色权限关系-->
+    <insert id="addBatchRoleRight" parameterType="roleRight">   
+	   	insert into t_roleright(   		 
+	   		roleid,
+	   		rightid
+	   	) values 
+	   	 (#{roleId},#{rightId})  
+	   	<!-- <foreach collection="list" item="item" index="index" separator="," >  
+         (#{item.roleId},#{item.rightId})  
+        </foreach> -->
+   </insert> 
+   <!--批量删除角色权限关系-->
+   <delete id="deleteBatchRoleRight" parameterType="roleRight">
+   		DELETE FROM T_ROLERIGHT
+   		WHERE  1=0 
+   		<foreach collection="list" item="item" index="index" >
+   		OR(
+   		ROLEID=#{item.roleId} AND RIGHTID=#{item.rightId}
+   		)
+   		</foreach>
+   </delete>
+   
+    <delete id="delRoleRightByRId" parameterType="long">
+    	delete from t_roleright where  roleid=#{roleId}    	
+	</delete>	
+	   
+    <delete id="delRoleRightByRightId" parameterType="long">
+    	delete from t_roleright where rightid=#{rightId}
+	</delete>		   
+		
+
+		
+
+</mapper>

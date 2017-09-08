@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.springmvc.mybatis.mapper.RightDao">
+    <!--根据类型获取权限列表，供页面构建权限树-->
+	<select id="findAllRight" parameterType="int" resultType="rightInfo">
+		select * from t_rightinfo where 1=1 
+		<if test="value != -1">
+		  and righttype=#{rightType}
+		</if>
+	</select>
+	
+    <!--根据类型获取权限列表排除按钮，供页面构建权限树-->
+	<select id="findAllRightNoButton" parameterType="int" resultType="rightInfo">
+		select * from t_rightinfo where righttype=#{rightType} and sourcetype !=2
+	</select>	
+	
+    <!--根据权限id获取权限-->
+	<select id="findRightById" parameterType="Long" resultType="rightInfo">
+		select * from t_rightinfo where rightid=#{rightId}
+	</select>	
+
+    <!--根据权限id获取权限的直接下级权限-->
+	<select id="findAllRightByParentId" parameterType="map" resultType="rightInfo">
+		select * from t_rightinfo where parentid=#{rightId} and righttype=#{rightType}
+	</select>	
+	
+    <!--根据权限码获取权限信息-->
+	<select id="findAllRightByCode" parameterType="rightInfo" resultType="rightInfo">
+		select * from t_rightinfo where rightcode=#{rightCode}
+	</select>		
+    <!--根据权限名获取权限信息-->
+	<select id="findAllRightByName" parameterType="rightInfo" resultType="rightInfo">
+		select * from t_rightinfo where rightname=#{rightName}
+	</select>			
+	
+    
+	
+   <!-- 获取序列 -->	
+  <select id="getSqe" resultType="long">
+      SELECT sq_rightinfo.nextval FROM dual      
+  </select>	
+  
+   
+	<!--根据权限id获取所有的下级权限 -->
+	<select id="findRightsByIdForAllSubord"  parameterType="long"  resultType="rightInfo">
+		select tr.rightid, tr.parentid from t_rightinfo tr start with rightid = #{rightId} connect by prior rightid = parentid
+	</select>		   
+	
+	<!--根据权限id获取所有的下级权限 -->
+	<select id="findRightsByRole"  parameterType="long"  resultType="rightInfo">
+		select t.* from t_rightinfo t, t_roleright t2 where t.rightid=t2.rightid and t2.roleid=#{roleid}
+	</select>     
+
+</mapper>

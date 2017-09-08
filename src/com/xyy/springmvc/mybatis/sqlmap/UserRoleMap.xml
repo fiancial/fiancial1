@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.springmvc.mybatis.mapper.UserRoleDao">
+    <!--根据用户id获取用户拥有的角色 -->
+	<select id="findUserRolesByUId" resultType="userRole"  parameterType="long">
+		select * from t_userrole t where 1=1 
+		<if test="value != -1">  
+		   and userid=#{userId}
+		</if>
+	</select>		
+  
+  <insert id="insertUserRole" parameterType="userRole">   
+	   	insert into t_userrole(   		 
+	   		userid,
+	   		usertype,
+	   		roleid
+	   	) values (
+			#{userId},
+	   		#{userType},
+	   		#{roleId}
+	   	)   	
+   </insert> 
+   
+   <insert id="addBatchUserRole" parameterType="java.util.List">   
+	   	insert into t_userrole(   		 
+	   		userid,
+	   		usertype,
+	   		roleid
+	   	) values 
+	   	<foreach collection="list" item="item" index="index" separator="," >  
+        (#{item.userId},#{item.userType},#{item.roleId})  
+    </foreach>  
+   </insert>
+    	
+   
+    <delete id="delUserRoleByUId" parameterType="long">
+    	delete from t_userrole where userid=#{userId}
+	</delete>	
+	
+    <delete id="delUserRoleByRId" parameterType="long">
+    	delete from t_userrole where roleId=#{roleId}
+	</delete>		   
+		
+
+</mapper>
